@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}{{ saree.name }} - Silk Saree Boutique{% endblock %}
+{% block content %}
+<div class="row g-4 align-items-start">
+  <div class="col-lg-6">
+    <img src="{{ url_for('static', filename='uploads/' ~ saree.image_filename) }}" class="img-fluid rounded-4 shadow-sm" alt="{{ saree.name }}">
+  </div>
+  <div class="col-lg-6">
+    <h2 class="fw-bold">{{ saree.name }}</h2>
+    <p class="fs-3 text-danger fw-semibold">₹{{ '%.2f'|format(saree.price) }}</p>
+    <p class="text-secondary">{{ saree.description }}</p>
+    <button id="buyNowBtn" class="btn btn-lg btn-dark">Buy Now</button>
+    <p class="small text-muted mt-3 mb-0">Secure payment via Razorpay.</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+const buyBtn = document.getElementById('buyNowBtn');
+
+buyBtn.addEventListener('click', async () => {
+  try {
+    const orderResponse = await fetch("{{ url_for('create_razorpay_order', saree_id=saree.id) }}", { method: 'POST' });
+    const orderData = await orderResponse.json();
+
+    if (!orderResponse.ok) {
+      alert(orderData.error || 'Unable to create payment order.');
+      return;
+    }
+
+    const options = {
+      key: orderData.key,
+      amount: orderData.amount,
+      currency: 'INR',
+      name: 'Silk Saree Boutique',
+      description: orderData.name,
+      order_id: orderData.order_id,
+      handler: async function (response) {
+        const verifyResponse = await fetch("{{ url_for('payment_success') }}", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...response,
+            saree_name: "{{ saree.name }}",
+            price: "{{ saree.price }}"
+          })
+        });
+
+        const result = await verifyResponse.json();
+        alert(result.message);
+        if (result.status === 'ok') {
+          window.location.href = "{{ url_for('home') }}";
+        }
+      },
+      theme: { color: '#1f2937' }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+  } catch (error) {
+    alert('Payment initialization failed. Please try again.');
+  }
+});
+</script>
+{% endblock %}
