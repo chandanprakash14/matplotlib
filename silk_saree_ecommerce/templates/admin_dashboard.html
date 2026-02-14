@@ -1,59 +1,65 @@
 {% extends 'base.html' %}
 {% block title %}Admin Dashboard{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-  <h2 class="mb-0">Dashboard</h2>
-  <div class="d-flex gap-2">
-    <a href="{{ url_for('manage_sarees') }}" class="btn btn-outline-dark">Manage Sarees</a>
-    <a href="{{ url_for('admin_orders') }}" class="btn btn-outline-dark">View Orders</a>
-    <a href="{{ url_for('admin_logout') }}" class="btn btn-dark">Logout</a>
-  </div>
-</div>
+<section class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Admin Dashboard</h1>
+        <a href="{{ url_for('add_saree') }}" class="btn btn-primary">+ Add Saree</a>
+    </div>
 
-<div class="row g-3 mb-4">
-  <div class="col-md-4">
-    <div class="card border-0 shadow-sm p-3 metric-card">
-      <p class="text-muted mb-1">Total Sarees</p>
-      <h3>{{ total_sarees }}</h3>
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="stat-card p-4 rounded-4">
+                <p class="mb-1 text-muted">Total Sarees</p>
+                <h3 class="mb-0">{{ total_sarees }}</h3>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="stat-card p-4 rounded-4">
+                <p class="mb-1 text-muted">WhatsApp Enquiries</p>
+                <h3 class="mb-0">{{ whatsapp_enquiries }}</h3>
+            </div>
+        </div>
     </div>
-  </div>
-  <div class="col-md-4">
-    <div class="card border-0 shadow-sm p-3 metric-card">
-      <p class="text-muted mb-1">Total Orders</p>
-      <h3>{{ total_orders }}</h3>
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="card border-0 shadow-sm p-3 metric-card">
-      <p class="text-muted mb-1">Total Revenue</p>
-      <h3>₹{{ '%.2f'|format(total_revenue) }}</h3>
-    </div>
-  </div>
-</div>
 
-<div class="card shadow-sm border-0">
-  <div class="card-body">
-    <h5>Recent Orders</h5>
-    <div class="table-responsive">
-      <table class="table align-middle">
-        <thead>
-          <tr><th>#</th><th>Saree</th><th>Price</th><th>Payment ID</th><th>Date</th></tr>
-        </thead>
-        <tbody>
-          {% for order in recent_orders %}
-          <tr>
-            <td>{{ order.id }}</td>
-            <td>{{ order.saree_name }}</td>
-            <td>₹{{ '%.2f'|format(order.price) }}</td>
-            <td>{{ order.razorpay_payment_id }}</td>
-            <td>{{ order.order_date.strftime('%d %b %Y %H:%M') }}</td>
-          </tr>
-          {% else %}
-          <tr><td colspan="5" class="text-center text-muted">No orders yet.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body">
+            <h2 class="h5 mb-3">Manage Sarees</h2>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Image</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for saree in sarees %}
+                        <tr>
+                            <td>{{ saree.name }}</td>
+                            <td>₹{{ '%.2f'|format(saree.price) }}</td>
+                            <td>
+                                <img src="{{ url_for('static', filename='uploads/' + saree.image_filename) }}" alt="{{ saree.name }}" class="admin-thumb" />
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ url_for('edit_saree', saree_id=saree.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <form class="d-inline" method="post" action="{{ url_for('delete_saree', saree_id=saree.id) }}" onsubmit="return confirm('Delete this saree?');">
+                                    <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">No sarees added yet.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
+</section>
 {% endblock %}

@@ -1,27 +1,20 @@
 import os
 from datetime import datetime
 from functools import wraps
+from urllib.parse import quote
 
-import razorpay
-from flask import (
-    Flask,
-    flash,
-    jsonify,
-    redirect,
-    render_template,
-    request,
-    session,
-    url_for,
-)
+from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "gif", "svg"}
+WHATSAPP_NUMBER = "7539967397"
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-change-this-secret")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "change-this-in-production")
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(BASE_DIR, 'database.db')}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -35,7 +28,7 @@ db = SQLAlchemy(app)
 class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
 
 
 class Saree(db.Model):
@@ -46,65 +39,71 @@ class Saree(db.Model):
     description = db.Column(db.Text, nullable=False)
 
 
-class Order(db.Model):
+class WhatsappEnquiry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    saree_name = db.Column(db.String(150), nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    razorpay_payment_id = db.Column(db.String(120), unique=True, nullable=False)
-    order_date = db.Column(db.DateTime, default=datetime.utcnow)
+    saree_id = db.Column(db.Integer, db.ForeignKey("saree.id"), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 
-def init_default_admin() -> None:
-    username = os.getenv("ADMIN_USERNAME", "admin")
-    password = os.getenv("ADMIN_PASSWORD", "admin123")
-
-    admin = Admin.query.filter_by(username=username).first()
-    if not admin:
-        admin = Admin(username=username, password=generate_password_hash(password))
-        db.session.add(admin)
-        db.session.commit()
+def allowed_file(filename: str) -> bool:
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def save_uploaded_image(file_storage) -> str:
+    filename = secure_filename(file_storage.filename)
+    if not filename or not allowed_file(filename):
+        return ""
 
+    unique_name = f"{datetime.utcnow().strftime('%Y%m%d%H%M%S%f')}_{filename}"
+    file_storage.save(os.path.join(app.config["UPLOAD_FOLDER"], unique_name))
+    return unique_name
 
-def seed_demo_sarees() -> None:
-    if Saree.query.count() > 0:
-        return
-
-    demo_items = [
-        Saree(
-            name="Kanchipuram Royal Maroon",
-            price=8999.0,
-            image_filename="demo_maroon.svg",
-            description="Pure zari Kanchipuram silk saree with rich pallu and traditional motifs.",
-        ),
-        Saree(
-            name="Banarasi Emerald Weave",
-            price=7499.0,
-            image_filename="demo_emerald.svg",
-            description="Handwoven Banarasi silk saree in emerald green with intricate golden work.",
-        ),
-    ]
-    db.session.add_all(demo_items)
-    db.session.commit()
 
 def admin_login_required(view_func):
     @wraps(view_func)
     def wrapper(*args, **kwargs):
-        if not session.get("admin_id"):
-            flash("Please login to continue.", "warning")
+        if "admin_id" not in session:
+            flash("Please log in to access admin pages.", "warning")
             return redirect(url_for("admin_login"))
         return view_func(*args, **kwargs)
 
     return wrapper
 
 
-def get_razorpay_client():
-    key_id = os.getenv("RAZORPAY_KEY_ID", "")
-    key_secret = os.getenv("RAZORPAY_KEY_SECRET", "")
-    if not key_id or not key_secret:
-        return None
-    return razorpay.Client(auth=(key_id, key_secret))
+def ensure_default_admin() -> None:
+    admin_username = os.getenv("ADMIN_USERNAME", "admin")
+    admin_password = os.getenv("ADMIN_PASSWORD", "admin123")
+
+    if not Admin.query.filter_by(username=admin_username).first():
+        db.session.add(
+            Admin(
+                username=admin_username,
+                password=generate_password_hash(admin_password),
+            )
+        )
+        db.session.commit()
+
+
+def ensure_seed_sarees() -> None:
+    if Saree.query.count() > 0:
+        return
+
+    demo_sarees = [
+        Saree(
+            name="Kanchipuram Royal Maroon",
+            price=8999,
+            image_filename="demo_maroon.svg",
+            description="Elegant maroon Kanchipuram silk saree with traditional zari border and rich pallu.",
+        ),
+        Saree(
+            name="Banarasi Emerald Weave",
+            price=7499,
+            image_filename="demo_emerald.svg",
+            description="Premium Banarasi silk saree in emerald green, woven with floral gold motifs.",
+        ),
+    ]
+    db.session.add_all(demo_sarees)
+    db.session.commit()
 
 
 @app.route("/")
@@ -114,77 +113,23 @@ def home():
 
 
 @app.route("/saree/<int:saree_id>")
-def saree_details(saree_id):
+def product_details(saree_id):
     saree = Saree.query.get_or_404(saree_id)
-    return render_template("saree_details.html", saree=saree, razorpay_key=os.getenv("RAZORPAY_KEY_ID", ""))
-
-
-@app.post("/create-razorpay-order/<int:saree_id>")
-def create_razorpay_order(saree_id):
-    saree = Saree.query.get_or_404(saree_id)
-    client = get_razorpay_client()
-    if not client:
-        return jsonify({"error": "Razorpay keys are not configured on server."}), 500
-
-    order_payload = {
-        "amount": int(saree.price * 100),
-        "currency": "INR",
-        "payment_capture": "1",
-        "notes": {"saree_id": str(saree.id), "saree_name": saree.name},
-    }
-    razorpay_order = client.order.create(order_payload)
-    return jsonify(
-        {
-            "order_id": razorpay_order["id"],
-            "amount": order_payload["amount"],
-            "name": saree.name,
-            "price": saree.price,
-            "key": os.getenv("RAZORPAY_KEY_ID", ""),
-        }
+    message = (
+        "Hi, I want to buy this saree:\n"
+        f"Name: {saree.name}\n"
+        f"Price: ₹{saree.price:,.2f}"
     )
+    whatsapp_link = f"https://wa.me/{WHATSAPP_NUMBER}?text={quote(message)}"
+    return render_template("product_details.html", saree=saree, whatsapp_link=whatsapp_link)
 
 
-@app.post("/payment/success")
-def payment_success():
-    payload = request.get_json(silent=True) or request.form
-
-    razorpay_order_id = payload.get("razorpay_order_id")
-    razorpay_payment_id = payload.get("razorpay_payment_id")
-    razorpay_signature = payload.get("razorpay_signature")
-    saree_name = payload.get("saree_name")
-    price = payload.get("price")
-
-    if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature, saree_name, price]):
-        return jsonify({"status": "error", "message": "Invalid payment data."}), 400
-
-    client = get_razorpay_client()
-    if not client:
-        return jsonify({"status": "error", "message": "Razorpay is not configured."}), 500
-
-    try:
-        client.utility.verify_payment_signature(
-            {
-                "razorpay_order_id": razorpay_order_id,
-                "razorpay_payment_id": razorpay_payment_id,
-                "razorpay_signature": razorpay_signature,
-            }
-        )
-
-        existing_payment = Order.query.filter_by(razorpay_payment_id=razorpay_payment_id).first()
-        if existing_payment:
-            return jsonify({"status": "ok", "message": "Payment already recorded."})
-
-        order = Order(
-            saree_name=saree_name,
-            price=float(price),
-            razorpay_payment_id=razorpay_payment_id,
-        )
-        db.session.add(order)
-        db.session.commit()
-        return jsonify({"status": "ok", "message": "Payment verified and order placed."})
-
-    except razorpay.errors.SignatureVerificationError:
-        return jsonify({"status": "error", "message": "Payment signature verification failed."}), 400
+@app.post("/saree/<int:saree_id>/track-enquiry")
+def track_enquiry(saree_id):
+    Saree.query.get_or_404(saree_id)
+    db.session.add(WhatsappEnquiry(saree_id=saree_id))
+    db.session.commit()
+    return {"status": "ok"}
 
 
 @app.route("/admin/login", methods=["GET", "POST"])
@@ -197,7 +142,7 @@ def admin_login():
         if admin and check_password_hash(admin.password, password):
             session["admin_id"] = admin.id
             session["admin_username"] = admin.username
-            flash("Welcome back!", "success")
+            flash("Logged in successfully.", "success")
             return redirect(url_for("admin_dashboard"))
 
         flash("Invalid username or password.", "danger")
@@ -217,35 +162,14 @@ def admin_logout():
 @admin_login_required
 def admin_dashboard():
     total_sarees = Saree.query.count()
-    total_orders = Order.query.count()
-    total_revenue = db.session.query(db.func.sum(Order.price)).scalar() or 0
-    recent_orders = Order.query.order_by(Order.order_date.desc()).limit(5).all()
-
+    whatsapp_enquiries = WhatsappEnquiry.query.count()
+    sarees = Saree.query.order_by(Saree.id.desc()).all()
     return render_template(
         "admin_dashboard.html",
         total_sarees=total_sarees,
-        total_orders=total_orders,
-        total_revenue=total_revenue,
-        recent_orders=recent_orders,
+        whatsapp_enquiries=whatsapp_enquiries,
+        sarees=sarees,
     )
-
-
-@app.route("/admin/sarees")
-@admin_login_required
-def manage_sarees():
-    sarees = Saree.query.order_by(Saree.id.desc()).all()
-    return render_template("manage_sarees.html", sarees=sarees)
-
-
-def save_uploaded_image(file_storage):
-    filename = secure_filename(file_storage.filename)
-    if not filename:
-        return ""
-
-    unique_name = f"{datetime.utcnow().strftime('%Y%m%d%H%M%S%f')}_{filename}"
-    path = os.path.join(app.config["UPLOAD_FOLDER"], unique_name)
-    file_storage.save(path)
-    return unique_name
 
 
 @app.route("/admin/sarees/add", methods=["GET", "POST"])
@@ -257,18 +181,34 @@ def add_saree():
         description = request.form.get("description", "").strip()
         image = request.files.get("image")
 
-        if not name or not price or not description or not image:
-            flash("Please fill all fields and upload an image.", "warning")
+        if not all([name, price, description, image]):
+            flash("All fields are required.", "warning")
             return redirect(request.url)
 
         image_filename = save_uploaded_image(image)
-        saree = Saree(name=name, price=float(price), description=description, image_filename=image_filename)
-        db.session.add(saree)
+        if not image_filename:
+            flash("Please upload a valid image file (png, jpg, jpeg, webp, gif, svg).", "danger")
+            return redirect(request.url)
+
+        try:
+            parsed_price = float(price)
+        except ValueError:
+            flash("Price must be a valid number.", "danger")
+            return redirect(request.url)
+
+        db.session.add(
+            Saree(
+                name=name,
+                price=parsed_price,
+                description=description,
+                image_filename=image_filename,
+            )
+        )
         db.session.commit()
         flash("Saree added successfully.", "success")
-        return redirect(url_for("manage_sarees"))
+        return redirect(url_for("admin_dashboard"))
 
-    return render_template("saree_form.html", page_title="Add Saree", saree=None)
+    return render_template("add_saree.html")
 
 
 @app.route("/admin/sarees/edit/<int:saree_id>", methods=["GET", "POST"])
@@ -278,18 +218,27 @@ def edit_saree(saree_id):
 
     if request.method == "POST":
         saree.name = request.form.get("name", saree.name).strip()
-        saree.price = float(request.form.get("price", saree.price))
         saree.description = request.form.get("description", saree.description).strip()
+
+        try:
+            saree.price = float(request.form.get("price", saree.price))
+        except ValueError:
+            flash("Price must be a valid number.", "danger")
+            return redirect(request.url)
 
         image = request.files.get("image")
         if image and image.filename:
-            saree.image_filename = save_uploaded_image(image)
+            image_filename = save_uploaded_image(image)
+            if not image_filename:
+                flash("Please upload a valid image file (png, jpg, jpeg, webp, gif, svg).", "danger")
+                return redirect(request.url)
+            saree.image_filename = image_filename
 
         db.session.commit()
         flash("Saree updated successfully.", "success")
-        return redirect(url_for("manage_sarees"))
+        return redirect(url_for("admin_dashboard"))
 
-    return render_template("saree_form.html", page_title="Edit Saree", saree=saree)
+    return render_template("edit_saree.html", saree=saree)
 
 
 @app.post("/admin/sarees/delete/<int:saree_id>")
@@ -298,21 +247,14 @@ def delete_saree(saree_id):
     saree = Saree.query.get_or_404(saree_id)
     db.session.delete(saree)
     db.session.commit()
-    flash("Saree deleted.", "info")
-    return redirect(url_for("manage_sarees"))
-
-
-@app.route("/admin/orders")
-@admin_login_required
-def admin_orders():
-    orders = Order.query.order_by(Order.order_date.desc()).all()
-    return render_template("admin_orders.html", orders=orders)
+    flash("Saree deleted successfully.", "info")
+    return redirect(url_for("admin_dashboard"))
 
 
 with app.app_context():
     db.create_all()
-    init_default_admin()
-    seed_demo_sarees()
+    ensure_default_admin()
+    ensure_seed_sarees()
 
 
 if __name__ == "__main__":

@@ -1,27 +1,30 @@
 {% extends 'base.html' %}
-{% block title %}Home - Silk Saree Boutique{% endblock %}
-{% block content %}
-<section class="hero rounded-4 p-4 p-md-5 mb-4 text-white">
-  <h1 class="display-6 fw-bold">Elegant Silk Sarees Collection</h1>
-  <p class="mb-0">Explore timeless designs crafted with beauty, comfort, and luxury.</p>
-</section>
+{% block title %}Silk Sarees | Home{% endblock %}
 
-<div class="row g-4">
-  {% for saree in sarees %}
-  <div class="col-sm-6 col-lg-4">
-    <div class="card h-100 shadow-sm border-0 saree-card">
-      <img src="{{ url_for('static', filename='uploads/' ~ saree.image_filename) }}" class="card-img-top" alt="{{ saree.name }}">
-      <div class="card-body d-flex flex-column">
-        <h5 class="card-title">{{ saree.name }}</h5>
-        <p class="text-danger fw-semibold fs-5">₹{{ '%.2f'|format(saree.price) }}</p>
-        <a href="{{ url_for('saree_details', saree_id=saree.id) }}" class="btn btn-dark mt-auto">View Details</a>
-      </div>
+{% block content %}
+<section class="container">
+    <div class="hero-banner p-4 p-md-5 mb-4 rounded-4 text-light">
+        <h1 class="display-6 fw-bold mb-2">Find Your Perfect Silk Saree</h1>
+        <p class="mb-0">Shop elegant, handpicked sarees with timeless craftsmanship and modern grace.</p>
     </div>
-  </div>
-  {% else %}
-  <div class="col-12">
-    <div class="alert alert-info">No sarees added yet. Admin can add products from dashboard.</div>
-  </div>
-  {% endfor %}
-</div>
+
+    <div class="row g-4">
+        {% for saree in sarees %}
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card h-100 product-card border-0 shadow-sm">
+                    <img src="{{ url_for('static', filename='uploads/' + saree.image_filename) }}" class="card-img-top product-image" alt="{{ saree.name }}" />
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ saree.name }}</h5>
+                        <p class="price-tag mb-3">₹{{ '%.2f'|format(saree.price) }}</p>
+                        <a href="{{ url_for('product_details', saree_id=saree.id) }}" class="btn btn-dark mt-auto">View Details</a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">No sarees available yet. Please check back soon.</div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
 {% endblock %}
