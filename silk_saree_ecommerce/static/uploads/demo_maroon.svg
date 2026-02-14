@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200">
+  <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#6d0f34"/><stop offset="1" stop-color="#b0004f"/></linearGradient></defs>
+  <rect width="900" height="1200" fill="url(#g)"/>
+  <rect x="70" y="70" width="760" height="1060" fill="none" stroke="#ffd700" stroke-width="14"/>
+  <text x="120" y="620" font-size="64" fill="#fff" font-family="Arial">Royal Maroon Silk</text>
+</svg>

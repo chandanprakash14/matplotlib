@@ -1,0 +1,26 @@
+body {
+  background: #f8f7fb;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.hero {
+  background: linear-gradient(120deg, #ad1457, #4527a0);
+}
+
+.saree-card img {
+  height: 280px;
+  object-fit: cover;
+}
+
+.metric-card {
+  border-left: 4px solid #111827;
+}
+
+.admin-thumb {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+}

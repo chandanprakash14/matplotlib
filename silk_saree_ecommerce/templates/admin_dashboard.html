@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <h2 class="mb-0">Dashboard</h2>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('manage_sarees') }}" class="btn btn-outline-dark">Manage Sarees</a>
+    <a href="{{ url_for('admin_orders') }}" class="btn btn-outline-dark">View Orders</a>
+    <a href="{{ url_for('admin_logout') }}" class="btn btn-dark">Logout</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm p-3 metric-card">
+      <p class="text-muted mb-1">Total Sarees</p>
+      <h3>{{ total_sarees }}</h3>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm p-3 metric-card">
+      <p class="text-muted mb-1">Total Orders</p>
+      <h3>{{ total_orders }}</h3>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm p-3 metric-card">
+      <p class="text-muted mb-1">Total Revenue</p>
+      <h3>₹{{ '%.2f'|format(total_revenue) }}</h3>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body">
+    <h5>Recent Orders</h5>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr><th>#</th><th>Saree</th><th>Price</th><th>Payment ID</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          {% for order in recent_orders %}
+          <tr>
+            <td>{{ order.id }}</td>
+            <td>{{ order.saree_name }}</td>
+            <td>₹{{ '%.2f'|format(order.price) }}</td>
+            <td>{{ order.razorpay_payment_id }}</td>
+            <td>{{ order.order_date.strftime('%d %b %Y %H:%M') }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" class="text-center text-muted">No orders yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
