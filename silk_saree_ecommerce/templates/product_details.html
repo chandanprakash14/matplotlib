@@ -6,8 +6,8 @@
     <div class="row g-5 align-items-start">
         <div class="col-lg-6">
             <div class="detail-image-wrap">
-                <img src="{{ url_for('static', filename='uploads/' ~ saree.image_filename) }}" alt="{{ saree.name }}" class="detail-image" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none');">
-                <div class="placeholder-box d-none">Image placeholder: {{ saree.image_filename }}</div>
+                <img src="{{ url_for('uploaded_saree_file', filename=saree.image_filename) }}" alt="{{ saree.name }}" class="detail-image" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none');">
+                <div class="placeholder-box d-none">Image unavailable</div>
             </div>
         </div>
         <div class="col-lg-6">

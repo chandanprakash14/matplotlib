@@ -5,7 +5,7 @@
 <section class="container">
     <div class="form-card mx-auto">
         <h1 class="h4 mb-4">Add Saree</h1>
-        <form method="post" class="row g-3">
+        <form method="post" enctype="multipart/form-data" class="row g-3">
             <div class="col-12">
                 <label class="form-label">Saree Name</label>
                 <input type="text" name="name" class="form-control" required>
@@ -24,8 +24,8 @@
                 </select>
             </div>
             <div class="col-12">
-                <label class="form-label">Image Filename</label>
-                <input type="text" name="image_filename" placeholder="example: saree1.jpg" class="form-control" required>
+                <label class="form-label">Upload Saree Image</label>
+                <input type="file" name="image_file" class="form-control" accept=".png,.jpg,.jpeg,.webp,.gif" required>
             </div>
             <div class="col-12">
                 <label class="form-label">Description</label>
