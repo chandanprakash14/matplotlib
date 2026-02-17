@@ -1,31 +1,22 @@
 {% extends 'base.html' %}
-{% block title %}{{ saree.name }} | Silk Sarees{% endblock %}
+{% block title %}{{ saree.name }} · Elegant Drapes Boutique{% endblock %}
 
 {% block content %}
 <section class="container">
-    <div class="row g-4 align-items-start">
-        <div class="col-md-6">
-            <img src="{{ url_for('static', filename='uploads/' + saree.image_filename) }}" class="img-fluid rounded-4 shadow-sm" alt="{{ saree.name }}" />
+    <div class="row g-5 align-items-start">
+        <div class="col-lg-6">
+            <div class="detail-image-wrap">
+                <img src="{{ url_for('static', filename='uploads/' ~ saree.image_filename) }}" alt="{{ saree.name }}" class="detail-image" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none');">
+                <div class="placeholder-box d-none">Image placeholder: {{ saree.image_filename }}</div>
+            </div>
         </div>
-        <div class="col-md-6">
-            <h2 class="fw-bold">{{ saree.name }}</h2>
-            <p class="price-tag fs-4">₹{{ '%.2f'|format(saree.price) }}</p>
-            <p class="text-muted lh-lg">{{ saree.description }}</p>
-            <a id="whatsapp-buy" class="btn btn-success btn-lg" href="{{ whatsapp_link }}" target="_blank" rel="noopener">
-                Buy Now on WhatsApp
-            </a>
+        <div class="col-lg-6">
+            <p class="category-label mb-2">{{ saree.category.name }}</p>
+            <h1 class="mb-3">{{ saree.name }}</h1>
+            <p class="price mb-4">₹{{ '{:,.0f}'.format(saree.price) }}</p>
+            <p class="mb-4">{{ saree.description }}</p>
+            <a href="{{ whatsapp_link }}" target="_blank" rel="noopener" class="btn btn-whatsapp btn-lg">Buy Now on WhatsApp</a>
         </div>
     </div>
 </section>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    document.getElementById('whatsapp-buy').addEventListener('click', function() {
-        fetch("{{ url_for('track_enquiry', saree_id=saree.id) }}", {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'}
-        });
-    });
-</script>
 {% endblock %}

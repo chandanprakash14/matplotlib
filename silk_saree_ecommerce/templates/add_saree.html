@@ -1,36 +1,41 @@
 {% extends 'base.html' %}
-{% block title %}Add Saree{% endblock %}
+{% block title %}Add Saree · Elegant Drapes Boutique{% endblock %}
 
 {% block content %}
 <section class="container">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-4">
-                    <h1 class="h4 mb-4">Add New Saree</h1>
-                    <form method="post" enctype="multipart/form-data">
-                        <div class="mb-3">
-                            <label class="form-label">Saree Name</label>
-                            <input type="text" name="name" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Price (₹)</label>
-                            <input type="number" step="0.01" min="1" name="price" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <textarea name="description" rows="4" class="form-control" required></textarea>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label">Image</label>
-                            <input type="file" name="image" class="form-control" accept=".png,.jpg,.jpeg,.webp,.gif,.svg" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Add Saree</button>
-                        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
-                    </form>
-                </div>
+    <div class="form-card mx-auto">
+        <h1 class="h4 mb-4">Add Saree</h1>
+        <form method="post" class="row g-3">
+            <div class="col-12">
+                <label class="form-label">Saree Name</label>
+                <input type="text" name="name" class="form-control" required>
             </div>
-        </div>
+            <div class="col-md-6">
+                <label class="form-label">Price (₹)</label>
+                <input type="number" step="0.01" min="1" name="price" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Category</label>
+                <select name="category_id" class="form-select" required>
+                    <option value="">Choose category</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Image Filename</label>
+                <input type="text" name="image_filename" placeholder="example: saree1.jpg" class="form-control" required>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Description</label>
+                <textarea name="description" rows="4" class="form-control" required></textarea>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button class="btn btn-dark">Save Saree</button>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-dark">Cancel</a>
+            </div>
+        </form>
     </div>
 </section>
 {% endblock %}

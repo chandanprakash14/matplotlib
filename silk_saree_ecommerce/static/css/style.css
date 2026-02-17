@@ -1,42 +1,163 @@
+:root {
+    --bg: #faf7f2;
+    --text: #1d1b1a;
+    --muted: #7c7168;
+    --gold: #b48a3a;
+    --card: #ffffff;
+    --border: #e8dfd3;
+}
+
 body {
-    background: #f8f6f4;
-    color: #222;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.hero-banner {
-    background: linear-gradient(135deg, #5e3b3b, #a36d6d);
+.boutique-navbar {
+    background: rgba(250, 247, 242, 0.95);
+    border-bottom: 1px solid var(--border);
 }
 
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.hero-card,
+.page-card,
+.auth-card,
+.form-card,
+.panel-card,
+.stat-card,
 .product-card {
-    border-radius: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(16, 12, 8, 0.05);
+}
+
+.hero-card {
+    padding: 3.5rem;
+    text-align: center;
+}
+
+.hero-eyebrow,
+.category-label {
+    color: var(--gold);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+.btn-gold {
+    background: var(--gold);
+    color: #fff;
+}
+
+.btn-gold:hover {
+    background: #9a752f;
+    color: #fff;
+}
+
+.section-title {
+    font-family: Georgia, "Times New Roman", Times, serif;
+}
+
+.product-image-wrap {
+    height: 250px;
     overflow: hidden;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-bottom: 1px solid var(--border);
 }
 
-.product-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.08);
-}
-
-.product-image {
-    height: 260px;
+.product-image,
+.detail-image {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
 }
 
-.price-tag {
-    color: #7a1f1f;
+.placeholder-box {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    min-height: 260px;
+    background: #f1ebe2;
+    color: var(--muted);
+    padding: 1rem;
+    text-align: center;
+    font-style: italic;
+}
+
+.price {
+    font-size: 1.25rem;
     font-weight: 700;
 }
 
-.stat-card {
-    background: #fff;
-    border: 1px solid #ece7e2;
+.boutique-select {
+    min-width: 240px;
 }
 
-.admin-thumb {
-    width: 70px;
-    height: 70px;
-    border-radius: 8px;
-    object-fit: cover;
-    border: 1px solid #ddd;
+.detail-image-wrap {
+    min-height: 420px;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    overflow: hidden;
+    background: #fff;
+}
+
+.btn-whatsapp {
+    background: #25d366;
+    color: #fff;
+}
+
+.btn-whatsapp:hover {
+    background: #1caa52;
+    color: #fff;
+}
+
+.page-card,
+.auth-card,
+.form-card,
+.panel-card {
+    padding: 2rem;
+}
+
+.auth-card,
+.form-card {
+    max-width: 700px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.stat-card h2 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+.empty-state {
+    padding: 2rem;
+    text-align: center;
+    background: #fff;
+    border: 1px dashed var(--border);
+    border-radius: 0.75rem;
+}
+
+.boutique-footer {
+    border-top: 1px solid var(--border);
+    background: #f5efe6;
+}
+
+.boutique-footer a {
+    color: var(--text);
+}
+
+@media (max-width: 768px) {
+    .hero-card {
+        padding: 2rem;
+    }
 }

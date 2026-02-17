@@ -1,68 +1,70 @@
-# Silk Saree E-Commerce Website (Flask)
+# Elegant Drapes Boutique · Silk Saree E-Commerce (Flask)
 
-A complete end-to-end project with two roles:
-- **Customer (End User)**: browse sarees, open details, and pay with Razorpay.
-- **Admin (Shop Owner)**: login securely, manage sarees (CRUD), view analytics and orders.
+A complete end-to-end boutique storefront with two roles:
+- **Customer**: browse, filter by category, view details, and buy through WhatsApp.
+- **Admin**: secure login, dashboard stats, category CRUD, and saree CRUD.
 
 ## Project Structure
 
 ```
 silk_saree_ecommerce/
 ├── app.py
-├── database.db (auto-created)
 ├── requirements.txt
 ├── templates/
-├── static/
-│   ├── css/style.css
-│   └── uploads/
+│   ├── base.html
+│   ├── home.html
+│   ├── product_details.html
+│   ├── about.html
+│   ├── contact.html
+│   ├── admin_login.html
+│   ├── admin_dashboard.html
+│   ├── add_saree.html
+│   ├── edit_saree.html
+│   └── add_category.html
+└── static/
+    ├── css/style.css
+    └── uploads/   # keep empty, add image files manually
 ```
 
-## Step-by-step Setup
+## Setup
 
-1. Create virtual environment:
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate
-   ```
+1. Create and activate a virtual environment.
 2. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-3. Configure environment variables (recommended):
+3. Optional environment variables:
    ```bash
    export SECRET_KEY='change-this'
    export ADMIN_USERNAME='admin'
    export ADMIN_PASSWORD='admin123'
-   export RAZORPAY_KEY_ID='rzp_test_xxx'
-   export RAZORPAY_KEY_SECRET='xxx'
    ```
-4. Run app:
+4. Run the app:
    ```bash
    python app.py
    ```
-5. Open in browser:
+5. Open:
    - Storefront: `http://127.0.0.1:5000/`
-   - Admin login: `http://127.0.0.1:5000/admin/login`
+   - Admin: `http://127.0.0.1:5000/admin/login`
 
-## Security Highlights
+## WhatsApp Buy Flow
 
-- Admin password stored with `generate_password_hash`.
-- Login checked via `check_password_hash`.
-- Admin pages protected using session + custom `@admin_login_required` decorator.
-- Image uploads sanitized with `secure_filename`.
+The **Buy Now on WhatsApp** button opens:
 
-## Razorpay Flow
+- Number: `7539967397`
+- Pre-filled message with:
+  - Saree Name
+  - Category
+  - Price
 
-1. Customer clicks **Buy Now**.
-2. Frontend requests backend route `/create-razorpay-order/<saree_id>`.
-3. Backend creates Razorpay order and returns order data.
-4. Razorpay Checkout opens in browser.
-5. On payment success, frontend sends payment details to `/payment/success`.
-6. Backend verifies signature and stores order in `Order` table.
-
-## Database Tables
+## Database Models
 
 - `Admin(id, username, password)`
-- `Saree(id, name, price, image_filename, description)`
-- `Order(id, saree_name, price, razorpay_payment_id, order_date)`
+- `Category(id, name)`
+- `Saree(id, name, price, description, image_filename, category_id)`
 
+## Security
+
+- Password hashing with Werkzeug.
+- Session-protected admin routes.
+- Filename sanitization using `secure_filename` for image filename input.

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Add Category · Elegant Drapes Boutique{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="form-card mx-auto">
+        <h1 class="h4 mb-4">Add Category</h1>
+        <form method="post" class="row g-3">
+            <div class="col-12">
+                <label class="form-label">Category Name</label>
+                <input type="text" name="name" class="form-control" placeholder="Kanchipuram Silk – Pure Zari" required>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button class="btn btn-dark">Save Category</button>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-dark">Cancel</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
