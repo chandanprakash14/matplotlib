@@ -5,7 +5,7 @@
 <section class="container">
     <div class="form-card mx-auto">
         <h1 class="h4 mb-4">Edit Saree</h1>
-        <form method="post" class="row g-3">
+        <form method="post" enctype="multipart/form-data" class="row g-3">
             <div class="col-12">
                 <label class="form-label">Saree Name</label>
                 <input type="text" name="name" class="form-control" value="{{ saree.name }}" required>
@@ -23,8 +23,10 @@
                 </select>
             </div>
             <div class="col-12">
-                <label class="form-label">Image Filename</label>
-                <input type="text" name="image_filename" class="form-control" value="{{ saree.image_filename }}" required>
+                <label class="form-label">Current Image</label>
+                <div class="small text-muted mb-2">{{ saree.image_filename }}</div>
+                <label class="form-label">Replace Image (Optional)</label>
+                <input type="file" name="image_file" class="form-control" accept=".png,.jpg,.jpeg,.webp,.gif">
             </div>
             <div class="col-12">
                 <label class="form-label">Description</label>

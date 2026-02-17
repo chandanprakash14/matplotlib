@@ -1,12 +1,12 @@
 # Elegant Drapes Boutique · Silk Saree E-Commerce (Flask)
 
-A complete end-to-end boutique storefront with two roles:
-- **Customer**: browse, filter by category, view details, and buy through WhatsApp.
-- **Admin**: secure login, dashboard stats, category CRUD, and saree CRUD.
+A complete boutique storefront with:
+- **Customer flow:** browse sarees, filter categories, view details, and buy via WhatsApp.
+- **Admin flow:** secure login, category CRUD, saree CRUD with real image uploads, logo management, and password update.
 
 ## Project Structure
 
-```
+```text
 silk_saree_ecommerce/
 ├── app.py
 ├── requirements.txt
@@ -20,51 +20,53 @@ silk_saree_ecommerce/
 │   ├── admin_dashboard.html
 │   ├── add_saree.html
 │   ├── edit_saree.html
-│   └── add_category.html
+│   ├── add_category.html
+│   └── upload_logo.html
 └── static/
     ├── css/style.css
-    └── uploads/   # keep empty, add image files manually
+    └── uploads/
+        ├── sarees/
+        └── logo/
 ```
 
 ## Setup
 
-1. Create and activate a virtual environment.
+1. Create and activate virtualenv.
 2. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-3. Optional environment variables:
+3. Optional env vars:
    ```bash
    export SECRET_KEY='change-this'
    export ADMIN_USERNAME='admin'
    export ADMIN_PASSWORD='admin123'
    ```
-4. Run the app:
+4. Run:
    ```bash
    python app.py
    ```
-5. Open:
-   - Storefront: `http://127.0.0.1:5000/`
-   - Admin: `http://127.0.0.1:5000/admin/login`
+
+## A to Z Admin Panel Access
+
+1. Open `http://127.0.0.1:5000/admin`.
+2. Login with your admin credentials (from env or defaults at first run).
+3. Use dashboard actions:
+   - Add/Edit/Delete categories
+   - Add/Edit/Delete sarees with image upload
+   - Upload/replace boutique logo
+4. Immediately change your password from **Change Admin Password** section in dashboard.
+5. Logout from navbar when done.
 
 ## WhatsApp Buy Flow
 
-The **Buy Now on WhatsApp** button opens:
-
+From product detail page, **Buy Now on WhatsApp** opens:
 - Number: `7539967397`
-- Pre-filled message with:
-  - Saree Name
-  - Category
-  - Price
+- Pre-filled message with saree Name, Category, and Price.
 
-## Database Models
+## Security Notes
 
-- `Admin(id, username, password)`
-- `Category(id, name)`
-- `Saree(id, name, price, description, image_filename, category_id)`
-
-## Security
-
-- Password hashing with Werkzeug.
+- Password hashing via Werkzeug.
 - Session-protected admin routes.
-- Filename sanitization using `secure_filename` for image filename input.
+- Secure image upload handling with `secure_filename`.
+- Allowed file-type validation for uploads.

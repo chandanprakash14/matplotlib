@@ -4,24 +4,35 @@
 {% block content %}
 <section class="container">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-        <h1 class="h3 mb-0">Admin Dashboard</h1>
-        <div class="d-flex gap-2">
+        <h1 class="h3 mb-0">Welcome, {{ session.get('admin_username') }}</h1>
+        <div class="d-flex gap-2 flex-wrap">
             <a class="btn btn-dark" href="{{ url_for('add_saree') }}">Add Saree</a>
             <a class="btn btn-outline-dark" href="{{ url_for('add_category') }}">Add Category</a>
+            <a class="btn btn-outline-dark" href="{{ url_for('upload_logo') }}">Manage Logo</a>
         </div>
     </div>
 
     <div class="row g-3 mb-5">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="stat-card">
                 <p>Total Sarees</p>
                 <h2>{{ total_sarees }}</h2>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="stat-card">
                 <p>Total Categories</p>
                 <h2>{{ total_categories }}</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <p>Current Logo</p>
+                {% if site_settings and site_settings.logo_filename %}
+                    <img src="{{ url_for('uploaded_logo_file', filename=site_settings.logo_filename) }}" alt="Boutique Logo" class="dashboard-logo">
+                {% else %}
+                    <small class="text-muted">No logo uploaded</small>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -64,7 +75,7 @@
                 <table class="table align-middle">
                     <thead>
                     <tr>
-                        <th>Name</th>
+                        <th>Saree</th>
                         <th>Category</th>
                         <th>Price</th>
                         <th class="text-end">Actions</th>
@@ -76,18 +87,38 @@
                         <td>{{ saree.name }}</td>
                         <td>{{ saree.category.name }}</td>
                         <td>₹{{ '{:,.0f}'.format(saree.price) }}</td>
-                        <td class="text-end">
+                        <td class="text-end d-flex gap-2 justify-content-end">
                             <a href="{{ url_for('edit_saree', saree_id=saree.id) }}" class="btn btn-sm btn-outline-dark">Edit</a>
-                            <form method="post" action="{{ url_for('delete_saree', saree_id=saree.id) }}" class="d-inline">
+                            <form method="post" action="{{ url_for('delete_saree', saree_id=saree.id) }}">
                                 <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this saree?')">Delete</button>
                             </form>
                         </td>
                     </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="text-center text-muted">No sarees added yet.</td></tr>
                     {% endfor %}
                     </tbody>
                 </table>
             </div>
         </section>
+
+        <section class="panel-card">
+            <h2 class="h5 mb-3">Change Admin Password</h2>
+            <form method="post" action="{{ url_for('update_admin_password') }}" class="row g-2">
+                <div class="col-md-6">
+                    <label class="form-label">Current Password</label>
+                    <input type="password" name="current_password" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">New Password (min 8 chars)</label>
+                    <input type="password" name="new_password" class="form-control" minlength="8" required>
+                </div>
+                <div class="col-12">
+                    <button class="btn btn-dark btn-sm">Update Password</button>
+                </div>
+            </form>
+        </section>
+
     </div>
 </section>
 {% endblock %}

@@ -1,24 +1,30 @@
 import os
+import uuid
 from functools import wraps
 from urllib.parse import quote
 
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask import Flask, abort, flash, redirect, render_template, request, send_from_directory, session, url_for
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
+UPLOAD_ROOT = os.path.join(BASE_DIR, "static", "uploads")
+SAREE_UPLOAD_FOLDER = os.path.join(UPLOAD_ROOT, "sarees")
+LOGO_UPLOAD_FOLDER = os.path.join(UPLOAD_ROOT, "logo")
+ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "gif"}
 WHATSAPP_NUMBER = "7539967397"
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "replace-me-in-production")
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(BASE_DIR, 'database.db')}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024
 
 db = SQLAlchemy(app)
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+os.makedirs(SAREE_UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(LOGO_UPLOAD_FOLDER, exist_ok=True)
 
 
 class Admin(db.Model):
@@ -47,6 +53,17 @@ class Saree(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
 
 
+class SiteSettings(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    logo_filename = db.Column(db.String(255), nullable=True)
+
+
+@app.context_processor
+def inject_site_settings():
+    settings = SiteSettings.query.first()
+    return {"site_settings": settings}
+
+
 def admin_login_required(view_func):
     @wraps(view_func)
     def wrapper(*args, **kwargs):
@@ -56,6 +73,33 @@ def admin_login_required(view_func):
         return view_func(*args, **kwargs)
 
     return wrapper
+
+
+def allowed_file(filename: str) -> bool:
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
+
+
+def save_uploaded_image(file_storage, destination_folder: str) -> str:
+    filename = secure_filename(file_storage.filename or "")
+    if not filename:
+        raise ValueError("Please select an image file.")
+
+    if not allowed_file(filename):
+        raise ValueError("Only png, jpg, jpeg, webp, and gif files are allowed.")
+
+    file_ext = filename.rsplit(".", 1)[1].lower()
+    unique_filename = f"{uuid.uuid4().hex}.{file_ext}"
+    file_storage.save(os.path.join(destination_folder, unique_filename))
+    return unique_filename
+
+
+def remove_file_if_exists(folder: str, filename: str | None) -> None:
+    if not filename:
+        return
+
+    file_path = os.path.join(folder, filename)
+    if os.path.exists(file_path):
+        os.remove(file_path)
 
 
 def create_default_admin() -> None:
@@ -84,6 +128,12 @@ def seed_default_categories() -> None:
     db.session.commit()
 
 
+def create_default_site_settings() -> None:
+    if not SiteSettings.query.first():
+        db.session.add(SiteSettings())
+        db.session.commit()
+
+
 def build_whatsapp_link(saree: Saree) -> str:
     message = (
         "Hi, I want to buy this saree from Elegant Drapes Boutique:\n"
@@ -104,12 +154,11 @@ def home():
         saree_query = saree_query.filter_by(category_id=category_id)
 
     sarees = saree_query.all()
-    selected_category = category_id
     return render_template(
         "home.html",
         sarees=sarees,
         categories=categories,
-        selected_category=selected_category,
+        selected_category=category_id,
     )
 
 
@@ -123,11 +172,34 @@ def contact():
     return render_template("contact.html")
 
 
+@app.route("/uploads/sarees/<path:filename>")
+def uploaded_saree_file(filename):
+    safe_name = secure_filename(filename)
+    if safe_name != filename:
+        abort(404)
+    return send_from_directory(SAREE_UPLOAD_FOLDER, safe_name)
+
+
+@app.route("/uploads/logo/<path:filename>")
+def uploaded_logo_file(filename):
+    safe_name = secure_filename(filename)
+    if safe_name != filename:
+        abort(404)
+    return send_from_directory(LOGO_UPLOAD_FOLDER, safe_name)
+
+
 @app.route("/saree/<int:saree_id>")
 def product_details(saree_id):
     saree = Saree.query.get_or_404(saree_id)
     whatsapp_link = build_whatsapp_link(saree)
     return render_template("product_details.html", saree=saree, whatsapp_link=whatsapp_link)
+
+
+@app.route("/admin")
+def admin_entry():
+    if session.get("admin_id"):
+        return redirect(url_for("admin_dashboard"))
+    return redirect(url_for("admin_login"))
 
 
 @app.route("/admin/login", methods=["GET", "POST"])
@@ -154,6 +226,27 @@ def admin_logout():
     session.clear()
     flash("Logged out successfully.", "info")
     return redirect(url_for("admin_login"))
+
+
+@app.post("/admin/password")
+@admin_login_required
+def update_admin_password():
+    current_password = request.form.get("current_password", "")
+    new_password = request.form.get("new_password", "")
+
+    if len(new_password) < 8:
+        flash("New password must be at least 8 characters.", "warning")
+        return redirect(url_for("admin_dashboard"))
+
+    admin = Admin.query.get(session.get("admin_id"))
+    if not admin or not check_password_hash(admin.password, current_password):
+        flash("Current password is incorrect.", "danger")
+        return redirect(url_for("admin_dashboard"))
+
+    admin.password = generate_password_hash(new_password)
+    db.session.commit()
+    flash("Admin password updated successfully.", "success")
+    return redirect(url_for("admin_dashboard"))
 
 
 @app.route("/admin/dashboard")
@@ -240,9 +333,9 @@ def add_saree():
         price_raw = request.form.get("price", "").strip()
         description = request.form.get("description", "").strip()
         category_id = request.form.get("category_id", type=int)
-        image_filename = secure_filename(request.form.get("image_filename", "").strip())
+        image_file = request.files.get("image_file")
 
-        if not all([name, price_raw, description, category_id, image_filename]):
+        if not all([name, price_raw, description, category_id, image_file]):
             flash("All fields are required.", "warning")
             return redirect(request.url)
 
@@ -257,6 +350,12 @@ def add_saree():
                 raise ValueError
         except ValueError:
             flash("Price must be a positive number.", "danger")
+            return redirect(request.url)
+
+        try:
+            image_filename = save_uploaded_image(image_file, SAREE_UPLOAD_FOLDER)
+        except ValueError as error:
+            flash(str(error), "danger")
             return redirect(request.url)
 
         db.session.add(
@@ -286,10 +385,10 @@ def edit_saree(saree_id):
         description = request.form.get("description", "").strip()
         price_raw = request.form.get("price", "").strip()
         category_id = request.form.get("category_id", type=int)
-        image_filename = secure_filename(request.form.get("image_filename", "").strip())
+        image_file = request.files.get("image_file")
 
-        if not all([name, description, price_raw, category_id, image_filename]):
-            flash("All fields are required.", "warning")
+        if not all([name, description, price_raw, category_id]):
+            flash("Name, description, price, and category are required.", "warning")
             return redirect(request.url)
 
         category = Category.query.get(category_id)
@@ -305,11 +404,19 @@ def edit_saree(saree_id):
             flash("Price must be a positive number.", "danger")
             return redirect(request.url)
 
+        if image_file and image_file.filename:
+            try:
+                new_filename = save_uploaded_image(image_file, SAREE_UPLOAD_FOLDER)
+            except ValueError as error:
+                flash(str(error), "danger")
+                return redirect(request.url)
+            remove_file_if_exists(SAREE_UPLOAD_FOLDER, saree.image_filename)
+            saree.image_filename = new_filename
+
         saree.name = name
         saree.description = description
         saree.price = price
         saree.category_id = category_id
-        saree.image_filename = image_filename
 
         db.session.commit()
         flash("Saree updated successfully.", "success")
@@ -322,16 +429,45 @@ def edit_saree(saree_id):
 @admin_login_required
 def delete_saree(saree_id):
     saree = Saree.query.get_or_404(saree_id)
+    remove_file_if_exists(SAREE_UPLOAD_FOLDER, saree.image_filename)
     db.session.delete(saree)
     db.session.commit()
     flash("Saree deleted.", "info")
     return redirect(url_for("admin_dashboard"))
 
 
+@app.route("/admin/logo", methods=["GET", "POST"])
+@admin_login_required
+def upload_logo():
+    settings = SiteSettings.query.first()
+
+    if request.method == "POST":
+        logo_file = request.files.get("logo_file")
+        if not logo_file or not logo_file.filename:
+            flash("Please choose a logo file.", "warning")
+            return redirect(request.url)
+
+        try:
+            new_logo_filename = save_uploaded_image(logo_file, LOGO_UPLOAD_FOLDER)
+        except ValueError as error:
+            flash(str(error), "danger")
+            return redirect(request.url)
+
+        remove_file_if_exists(LOGO_UPLOAD_FOLDER, settings.logo_filename)
+        settings.logo_filename = new_logo_filename
+        db.session.commit()
+
+        flash("Boutique logo updated successfully.", "success")
+        return redirect(url_for("admin_dashboard"))
+
+    return render_template("upload_logo.html", settings=settings)
+
+
 with app.app_context():
     db.create_all()
     create_default_admin()
     seed_default_categories()
+    create_default_site_settings()
 
 
 if __name__ == "__main__":
