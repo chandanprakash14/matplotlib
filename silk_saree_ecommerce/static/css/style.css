@@ -182,6 +182,23 @@ body {
     color: var(--text);
 }
 
+
+.icon-link {
+    font-size: 1.15rem;
+}
+
+.footer-instagram {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.footer-instagram:hover {
+    text-decoration: underline;
+}
+
 @media (max-width: 768px) {
     .hero-card {
         padding: 2rem;

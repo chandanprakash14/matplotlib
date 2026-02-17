@@ -195,6 +195,13 @@ def product_details(saree_id):
     return render_template("product_details.html", saree=saree, whatsapp_link=whatsapp_link)
 
 
+@app.route("/admin")
+def admin_entry():
+    if session.get("admin_id"):
+        return redirect(url_for("admin_dashboard"))
+    return redirect(url_for("admin_login"))
+
+
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
@@ -219,6 +226,27 @@ def admin_logout():
     session.clear()
     flash("Logged out successfully.", "info")
     return redirect(url_for("admin_login"))
+
+
+@app.post("/admin/password")
+@admin_login_required
+def update_admin_password():
+    current_password = request.form.get("current_password", "")
+    new_password = request.form.get("new_password", "")
+
+    if len(new_password) < 8:
+        flash("New password must be at least 8 characters.", "warning")
+        return redirect(url_for("admin_dashboard"))
+
+    admin = Admin.query.get(session.get("admin_id"))
+    if not admin or not check_password_hash(admin.password, current_password):
+        flash("Current password is incorrect.", "danger")
+        return redirect(url_for("admin_dashboard"))
+
+    admin.password = generate_password_hash(new_password)
+    db.session.commit()
+    flash("Admin password updated successfully.", "success")
+    return redirect(url_for("admin_dashboard"))
 
 
 @app.route("/admin/dashboard")

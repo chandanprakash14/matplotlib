@@ -101,6 +101,24 @@
                 </table>
             </div>
         </section>
+
+        <section class="panel-card">
+            <h2 class="h5 mb-3">Change Admin Password</h2>
+            <form method="post" action="{{ url_for('update_admin_password') }}" class="row g-2">
+                <div class="col-md-6">
+                    <label class="form-label">Current Password</label>
+                    <input type="password" name="current_password" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">New Password (min 8 chars)</label>
+                    <input type="password" name="new_password" class="form-control" minlength="8" required>
+                </div>
+                <div class="col-12">
+                    <button class="btn btn-dark btn-sm">Update Password</button>
+                </div>
+            </form>
+        </section>
+
     </div>
 </section>
 {% endblock %}
