@@ -6,7 +6,7 @@
     <div class="hero-card">
         <p class="hero-eyebrow">Luxury Silk Curation</p>
         <h1>Timeless Silk Sarees for Every Grand Occasion</h1>
-        <p>Discover handpicked premium drapes by Elegant Drapes Boutique from Arani, crafted for weddings, festivals, and heirloom wardrobes.</p>
+        <p>Discover handpicked premium drapes from Arani, crafted for weddings, festivals, and heirloom wardrobes with boutique-level elegance.</p>
         <a href="#collection" class="btn btn-gold">Explore Collection</a>
     </div>
 </section>
@@ -30,8 +30,8 @@
         <div class="col-md-6 col-lg-4">
             <article class="product-card h-100">
                 <div class="product-image-wrap">
-                    <img src="{{ url_for('static', filename='uploads/' ~ saree.image_filename) }}" alt="{{ saree.name }}" class="product-image" onerror="this.alt='Image placeholder: {{ saree.image_filename }}'; this.style.display='none'; this.nextElementSibling.classList.remove('d-none');">
-                    <div class="placeholder-box d-none">{{ saree.image_filename }}</div>
+                    <img src="{{ url_for('uploaded_saree_file', filename=saree.image_filename) }}" alt="{{ saree.name }}" class="product-image" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none');">
+                    <div class="placeholder-box d-none">Image not available</div>
                 </div>
                 <div class="p-4">
                     <p class="text-uppercase category-label">{{ saree.category.name }}</p>

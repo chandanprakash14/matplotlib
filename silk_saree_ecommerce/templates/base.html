@@ -10,7 +10,12 @@
 <body>
 <nav class="navbar navbar-expand-lg boutique-navbar sticky-top">
     <div class="container">
-        <a class="navbar-brand" href="{{ url_for('home') }}">Elegant Drapes Boutique</a>
+        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('home') }}">
+            {% if site_settings and site_settings.logo_filename %}
+                <img class="brand-logo" src="{{ url_for('uploaded_logo_file', filename=site_settings.logo_filename) }}" alt="Elegant Drapes Boutique logo">
+            {% endif %}
+            <span>Elegant Drapes Boutique</span>
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -47,6 +52,9 @@
 
 <footer class="boutique-footer py-4 mt-5">
     <div class="container text-center">
+        {% if site_settings and site_settings.logo_filename %}
+            <img class="footer-logo mb-2" src="{{ url_for('uploaded_logo_file', filename=site_settings.logo_filename) }}" alt="Elegant Drapes Boutique logo">
+        {% endif %}
         <p class="mb-1">Elegant Drapes Boutique · Premium Silk Sarees</p>
         <p class="mb-1">13/32 Narayanan Street, Arani, Tiruvannamalai District, Tamil Nadu, India</p>
         <a href="https://www.instagram.com/elegant_drapes_boutique/" target="_blank" rel="noopener">Instagram: @elegant_drapes_boutique</a>

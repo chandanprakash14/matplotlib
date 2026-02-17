@@ -8,7 +8,7 @@
 }
 
 body {
-    background: var(--bg);
+    background: linear-gradient(180deg, #faf7f2 0%, #f6f1e8 100%);
     color: var(--text);
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -16,11 +16,37 @@ body {
 .boutique-navbar {
     background: rgba(250, 247, 242, 0.95);
     border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(6px);
 }
 
 .navbar-brand {
     font-weight: 700;
     letter-spacing: 0.03em;
+    color: var(--text);
+}
+
+.brand-logo,
+.footer-logo,
+.dashboard-logo {
+    object-fit: contain;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: #fff;
+}
+
+.brand-logo {
+    width: 44px;
+    height: 44px;
+}
+
+.footer-logo {
+    width: 60px;
+    height: 60px;
+}
+
+.dashboard-logo {
+    width: 68px;
+    height: 68px;
 }
 
 .hero-card,
@@ -159,5 +185,10 @@ body {
 @media (max-width: 768px) {
     .hero-card {
         padding: 2rem;
+    }
+
+    .brand-logo {
+        width: 36px;
+        height: 36px;
     }
 }

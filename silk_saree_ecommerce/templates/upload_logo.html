@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Logo Management · Elegant Drapes Boutique{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="form-card mx-auto">
+        <h1 class="h4 mb-3">Upload Boutique Logo</h1>
+        <p class="text-muted">Upload a logo image to instantly update the navbar, admin panel, and footer branding.</p>
+        {% if settings.logo_filename %}
+            <div class="mb-3">
+                <label class="form-label">Current Logo</label>
+                <div>
+                    <img class="dashboard-logo" src="{{ url_for('uploaded_logo_file', filename=settings.logo_filename) }}" alt="Current boutique logo">
+                </div>
+            </div>
+        {% endif %}
+        <form method="post" enctype="multipart/form-data" class="row g-3">
+            <div class="col-12">
+                <label class="form-label">Select New Logo</label>
+                <input type="file" name="logo_file" class="form-control" accept=".png,.jpg,.jpeg,.webp,.gif" required>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button class="btn btn-dark">Upload Logo</button>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-dark">Back to Dashboard</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
