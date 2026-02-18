@@ -222,24 +222,6 @@ h6,
     padding: 1rem;
 }
 
-.price-block {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.55rem;
-    padding: 0.45rem 0.8rem;
-    border-radius: 999px;
-    background: rgba(90, 29, 43, 0.08);
-    border: 1px solid rgba(90, 29, 43, 0.18);
-}
-
-.price-label {
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--muted);
-    font-weight: 600;
-}
-
 .price {
     font-size: 1.45rem;
     color: var(--maroon);

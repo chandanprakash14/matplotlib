@@ -36,10 +36,6 @@
                 <div class="p-4">
                     <p class="text-uppercase category-label mb-2">{{ saree.category.name }}</p>
                     <h3 class="mb-2">{{ saree.name }}</h3>
-                    <div class="price-block mb-3" aria-label="Saree price">
-                        <span class="price-label">Price</span>
-                        <p class="price mb-0">₹{{ '{:,.0f}'.format(saree.price) }}</p>
-                    </div>
                     <a class="btn btn-outline-luxury w-100" href="{{ url_for('product_details', saree_id=saree.id) }}">View Details</a>
                 </div>
             </article>
