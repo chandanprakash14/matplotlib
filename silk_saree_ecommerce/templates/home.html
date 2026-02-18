@@ -4,10 +4,10 @@
 {% block content %}
 <section class="hero-section container mb-5">
     <div class="hero-card">
-        <p class="hero-eyebrow">Luxury Silk Curation</p>
-        <h1>Timeless Silk Sarees for Every Grand Occasion</h1>
-        <p>Discover handpicked premium drapes from Arani, crafted for weddings, festivals, and heirloom wardrobes with boutique-level elegance.</p>
-        <a href="#collection" class="btn btn-gold">Explore Collection</a>
+        <p class="hero-eyebrow">Arani Heritage · Modern Elegance</p>
+        <h1>Luxury Silk Sarees Curated for Timeless Celebrations</h1>
+        <p>Welcome to TCP SILKS, a premium boutique destination for exquisite silk sarees. Discover refined drapes for weddings, heirloom wardrobes, and grand festive moments.</p>
+        <a href="#collection" class="btn btn-gold mt-2">Explore Boutique Collection</a>
     </div>
 </section>
 
@@ -34,10 +34,13 @@
                     <div class="placeholder-box d-none">Image not available</div>
                 </div>
                 <div class="p-4">
-                    <p class="text-uppercase category-label">{{ saree.category.name }}</p>
-                    <h3>{{ saree.name }}</h3>
-                    <p class="price">₹{{ '{:,.0f}'.format(saree.price) }}</p>
-                    <a class="btn btn-outline-dark w-100" href="{{ url_for('product_details', saree_id=saree.id) }}">View Details</a>
+                    <p class="text-uppercase category-label mb-2">{{ saree.category.name }}</p>
+                    <h3 class="mb-2">{{ saree.name }}</h3>
+                    <div class="price-block mb-3" aria-label="Saree price">
+                        <span class="price-label">Price</span>
+                        <p class="price mb-0">₹{{ '{:,.0f}'.format(saree.price) }}</p>
+                    </div>
+                    <a class="btn btn-outline-luxury w-100" href="{{ url_for('product_details', saree_id=saree.id) }}">View Details</a>
                 </div>
             </article>
         </div>
