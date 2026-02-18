@@ -136,7 +136,7 @@ def create_default_site_settings() -> None:
 
 def build_whatsapp_link(saree: Saree) -> str:
     message = (
-        "Hi, I want to buy this saree from Elegant Drapes Boutique:\n"
+        "Hi, I want to buy this saree from TCP SILKS:\n"
         f"Name: {saree.name}\n"
         f"Category: {saree.category.name}\n"
         f"Price: ₹{saree.price:,.0f}"
