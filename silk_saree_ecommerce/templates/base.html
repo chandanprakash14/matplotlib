@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}TCP SILKS{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -17,11 +20,11 @@
             {% endif %}
             <span>TCP SILKS</span>
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="mainNav">
-            <ul class="navbar-nav ms-auto gap-lg-2 align-items-lg-center">
+            <ul class="navbar-nav ms-auto boutique-nav-links">
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Home</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('about') }}">About</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('contact') }}">Contact</a></li>
@@ -56,13 +59,13 @@
     {% block content %}{% endblock %}
 </main>
 
-<footer class="boutique-footer py-4 mt-5">
+<footer class="boutique-footer py-5 mt-5">
     <div class="container text-center">
         {% if site_settings and site_settings.logo_filename %}
-            <img class="footer-logo mb-2" src="{{ url_for('uploaded_logo_file', filename=site_settings.logo_filename) }}" alt="TCP SILKS logo">
+            <img class="footer-logo mb-3" src="{{ url_for('uploaded_logo_file', filename=site_settings.logo_filename) }}" alt="TCP SILKS logo">
         {% endif %}
-        <p class="mb-1">TCP SILKS · Premium Silk Sarees</p>
-        <p class="mb-1">13/32 Narayanan Street, Arani, Tiruvannamalai District, Tamil Nadu, India</p>
+        <p class="mb-1 footer-brand">TCP SILKS · Luxury Silk Sarees</p>
+        <p class="mb-2">13/32 Narayanan Street, Arani, Tiruvannamalai District, Tamil Nadu, India</p>
         <a class="footer-instagram" href="https://www.instagram.com/elegant_drapes_boutique/" target="_blank" rel="noopener">
             <i class="bi bi-instagram"></i> @elegant_drapes_boutique
         </a>
