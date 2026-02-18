@@ -11,11 +11,14 @@
             </div>
         </div>
         <div class="col-lg-6">
-            <p class="category-label mb-2">{{ saree.category.name }}</p>
-            <h1 class="mb-3">{{ saree.name }}</h1>
-            <p class="price mb-4">₹{{ '{:,.0f}'.format(saree.price) }}</p>
-            <p class="mb-4">{{ saree.description }}</p>
-            <a href="{{ whatsapp_link }}" target="_blank" rel="noopener" class="btn btn-whatsapp btn-lg">Buy Now on WhatsApp</a>
+            <div class="detail-card">
+                <p class="category-label mb-2">{{ saree.category.name }}</p>
+                <h1 class="mb-3">{{ saree.name }}</h1>
+                <p class="price mb-2">₹{{ '{:,.0f}'.format(saree.price) }}</p>
+                <p class="price-note mb-4">Luxury boutique pricing · Direct WhatsApp assistance</p>
+                <p class="mb-4">{{ saree.description }}</p>
+                <a href="{{ whatsapp_link }}" target="_blank" rel="noopener" class="btn btn-whatsapp btn-lg">Buy Now on WhatsApp</a>
+            </div>
         </div>
     </div>
 </section>
